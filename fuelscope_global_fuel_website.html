@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#07111f">
+  <meta name="description" content="Explore global fuel prices, taxation and energy economics from 2020 to 2026 through interactive Tableau dashboards and research stories.">
+  <title>FuelScope — Global Fuel Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <style>
+    :root {
+      --bg: #07111f; --surface: #0d1b2c; --surface-2: #12243a;
+      --text: #edf5ff; --muted: #9aabc0; --line: rgba(174,198,224,.15);
+      --accent: #a3e635; --accent-2: #42d6c5; --header: rgba(7,17,31,.78);
+      --shadow: 0 24px 70px rgba(0,0,0,.25);
+    }
+    body.light {
+      --bg: #f4f7fb; --surface: #fff; --surface-2: #eaf0f7;
+      --text: #142338; --muted: #5c6b7e; --line: rgba(27,54,84,.14);
+      --accent: #5c940d; --accent-2: #078f83; --header: rgba(244,247,251,.86);
+      --shadow: 0 24px 70px rgba(24,46,72,.10);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 90px; }
+    body { margin: 0; background: var(--bg); color: var(--text); font-family: "DM Sans", sans-serif; transition: background .3s,color .3s; }
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; }
+    .wrap { width: min(1160px, calc(100% - 44px)); margin: auto; }
+    .topbar { position: sticky; top: 0; z-index: 20; backdrop-filter: blur(18px); background: var(--header); border-bottom: 1px solid var(--line); }
+    .nav { height: 76px; display:flex; align-items:center; justify-content:space-between; gap:24px; }
+    .brand { display:flex; align-items:center; gap:11px; font:700 21px "Space Grotesk"; letter-spacing:-.7px; }
+    .brand-mark { width:34px; height:34px; border-radius:11px; display:grid; place-items:center; color:#07111f; background:var(--accent); font-weight:800; }
+    .nav-links { display:flex; align-items:center; gap:27px; color:var(--muted); font-size:13px; font-weight:600; }
+    .nav-links a:hover { color:var(--accent); }
+    .nav-actions { display:flex; align-items:center; gap:10px; }
+    .theme-btn,.menu-btn { width:40px; height:40px; border:1px solid var(--line); border-radius:50%; color:var(--text); background:var(--surface); cursor:pointer; }
+    .menu-btn { display:none; }
+    .hero { position:relative; overflow:hidden; padding:92px 0 78px; min-height:570px; display:flex; align-items:center; }
+    .hero:before { content:""; position:absolute; width:570px; height:570px; border-radius:50%; right:-70px; top:-40px; background:radial-gradient(circle,rgba(66,214,197,.16),rgba(66,214,197,0) 68%); pointer-events:none; }
+    .hero-grid { display:grid; grid-template-columns:1.05fr .95fr; align-items:center; gap:48px; position:relative; }
+    .eyebrow { display:inline-flex; align-items:center; gap:9px; color:var(--accent); text-transform:uppercase; letter-spacing:2px; font-size:11px; font-weight:700; }
+    .pulse { width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 5px color-mix(in srgb,var(--accent) 17%,transparent); }
+    h1,h2,h3 { font-family:"Space Grotesk",sans-serif; }
+    h1 { font-size:clamp(46px,6.3vw,76px); line-height:1.02; letter-spacing:-4px; margin:22px 0 20px; max-width:690px; }
+    h1 span { color:var(--accent); }
+    .hero-copy { color:var(--muted); font-size:16px; line-height:1.8; max-width:530px; }
+    .hero-buttons { display:flex; gap:12px; flex-wrap:wrap; margin-top:30px; }
+    .btn { display:inline-flex; align-items:center; justify-content:center; gap:9px; border-radius:9px; padding:14px 19px; font-size:13px; font-weight:700; transition:transform .2s,background .2s; }
+    .btn:hover { transform:translateY(-3px); }
+    .btn-primary { color:#07111f; background:var(--accent); }
+    .btn-secondary { border:1px solid var(--line); background:var(--surface); }
+    .map-art { width:100%; max-width:570px; justify-self:end; filter:drop-shadow(0 20px 45px rgba(0,0,0,.15)); }
+    .map-art path { fill:rgba(66,214,197,.16); stroke:rgba(66,214,197,.58); stroke-width:1.2; }
+    .map-art .route { fill:none; stroke:var(--accent); stroke-width:2; stroke-dasharray:5 8; }
+    .map-art .pin { fill:var(--accent); stroke:var(--bg); stroke-width:4; }
+    .map-caption { text-align:right; color:var(--muted); font-size:11px; margin-top:-8px; }
+    .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; padding-bottom:75px; }
+    .stat { background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:22px; box-shadow:var(--shadow); }
+    .stat strong { display:block; font:600 30px "Space Grotesk"; letter-spacing:-1px; }
+    .stat span { display:block; color:var(--muted); font-size:12px; margin-top:7px; }
+    section.content-section { padding:78px 0; border-top:1px solid var(--line); }
+    .section-head { display:flex; justify-content:space-between; align-items:end; gap:25px; margin-bottom:28px; }
+    .section-kicker { color:var(--accent-2); text-transform:uppercase; letter-spacing:2px; font-size:10px; font-weight:700; }
+    h2 { font-size:clamp(30px,4vw,45px); letter-spacing:-1.8px; margin:10px 0 8px; }
+    .section-desc { color:var(--muted); line-height:1.7; font-size:14px; max-width:650px; margin:0; }
+    .live-tag { border:1px solid var(--line); color:var(--muted); padding:9px 12px; border-radius:30px; font-size:11px; white-space:nowrap; }
+    .live-tag i { display:inline-block; width:6px;height:6px;border-radius:50%;background:var(--accent);margin-right:7px;vertical-align:middle; }
+    .viz-shell { background:var(--surface); border:1px solid var(--line); border-radius:16px; overflow:hidden; box-shadow:var(--shadow); }
+    .viz-top { display:flex; justify-content:space-between; align-items:center; gap:15px; padding:15px 19px; border-bottom:1px solid var(--line); }
+    .viz-top strong { font:600 13px "Space Grotesk"; }
+    .viz-top span { color:var(--muted); font-size:11px; }
+    .tableau-frame { width:100%; display:block; border:0; background:var(--surface); }
+    .dashboard-frame { height:1850px; }
+    .story-frame { height:820px; }
+    .story-tabs { display:flex; flex-wrap:wrap; gap:9px; margin:25px 0 17px; }
+    .story-tab { border:1px solid var(--line); background:var(--surface); color:var(--muted); border-radius:8px; padding:12px 15px; cursor:pointer; font-size:12px; font-weight:700; transition:.2s; }
+    .story-tab.active,.story-tab:hover { color:var(--bg); background:var(--accent); border-color:var(--accent); }
+    .story-panel { display:none; }
+    .story-panel.active { display:block; animation:fadeIn .45s ease; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
+    .story-intro { display:flex; align-items:center; justify-content:space-between; gap:20px; padding:18px 20px; border-bottom:1px solid var(--line); }
+    .story-intro h3 { font-size:17px; margin:0 0 5px; }
+    .story-intro p { color:var(--muted); font-size:12px; margin:0; }
+    .story-number { font:600 28px "Space Grotesk"; color:var(--accent); }
+    .insight-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:15px; margin-top:25px; }
+    .insight { border:1px solid var(--line); background:var(--surface); border-radius:13px; padding:21px; }
+    .insight b { display:block; font:600 15px "Space Grotesk"; margin:12px 0 7px; }
+    .insight p { color:var(--muted); font-size:12px; line-height:1.7; margin:0; }
+    .insight-icon { width:34px;height:34px;display:grid;place-items:center;border-radius:10px;background:var(--surface-2);color:var(--accent); }
+    .about-grid { display:grid; grid-template-columns:1fr 1fr; gap:45px; align-items:center; }
+    .about-card { padding:27px; border:1px solid var(--line); border-radius:15px; background:linear-gradient(135deg,var(--surface),var(--surface-2)); }
+    .about-card p { color:var(--muted); font-size:13px; line-height:1.8; }
+    .data-points { list-style:none; padding:0; margin:20px 0 0; display:grid; gap:13px; }
+    .data-points li { display:flex; gap:10px; align-items:flex-start; font-size:13px; color:var(--muted); }
+    .data-points li:before { content:"✓"; color:var(--accent); font-weight:800; }
+    footer { border-top:1px solid var(--line); padding:30px 0; color:var(--muted); font-size:11px; }
+    .footer-inner { display:flex; justify-content:space-between; gap:20px; flex-wrap:wrap; }
+    .to-top { color:var(--accent); }
+    @media(max-width:850px) {
+      .hero-grid { grid-template-columns:1fr; gap:25px; }
+      .hero { padding:70px 0 55px; }
+      .map-art { max-width:500px; justify-self:center; }
+      .map-caption { text-align:center; }
+      .stats { grid-template-columns:repeat(2,1fr); padding-bottom:55px; }
+      .about-grid { grid-template-columns:1fr; }
+      .nav-links { display:none; position:absolute; top:76px; left:0; right:0; padding:20px 24px; background:var(--surface); border-bottom:1px solid var(--line); flex-direction:column; align-items:flex-start; }
+      .nav-links.open { display:flex; }
+      .menu-btn { display:block; }
+      .dashboard-frame { height:1450px; }
+    }
+    @media(max-width:560px) {
+      .wrap { width:calc(100% - 30px); }
+      .nav { height:66px; }
+      .nav-links { top:66px; }
+      .brand { font-size:18px; }
+      .hero { min-height:auto; padding:58px 0 45px; }
+      h1 { letter-spacing:-2.5px; }
+      .hero-copy { font-size:14px; }
+      .stats { gap:9px; }
+      .stat { padding:16px; }
+      .stat strong { font-size:24px; }
+      section.content-section { padding:58px 0; }
+      .section-head { display:block; }
+      .live-tag { display:inline-block; margin-top:15px; }
+      .dashboard-frame { height:1100px; }
+      .story-frame { height:620px; }
+      .insight-grid { grid-template-columns:1fr; }
+      .story-intro { align-items:flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap nav">
+      <a class="brand" href="#home"><span class="brand-mark">F</span> FuelScope<span style="color:var(--accent)">.</span></a>
+      <nav class="nav-links" id="navLinks">
+        <a href="#overview">Overview</a><a href="#dashboard">Dashboard</a><a href="#stories">Research stories</a><a href="#about">About</a>
+      </nav>
+      <div class="nav-actions">
+        <button class="theme-btn" id="themeToggle" aria-label="Toggle light and dark theme">☼</button>
+        <button class="menu-btn" id="menuToggle" aria-label="Open navigation">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="home">
+    <section class="hero">
+      <div class="wrap hero-grid">
+        <div class="hero-text">
+          <div class="eyebrow"><span class="pulse"></span> Global energy intelligence · 2020–2026</div>
+          <h1>Understand the<br><span>price of energy.</span></h1>
+          <p class="hero-copy">Explore how fuel prices, taxation and government subsidies shape economies around the world. One interactive view bringing global energy data into focus.</p>
+          <div class="hero-buttons">
+            <a class="btn btn-primary" href="#dashboard">Explore dashboard <span>↗</span></a>
+            <a class="btn btn-secondary" href="#stories">Discover the stories <span>↓</span></a>
+          </div>
+        </div>
+        <div>
+          <svg class="map-art" viewBox="0 0 620 390" role="img" aria-label="Stylized world map with global energy data connections">
+            <defs><pattern id="dots" width="13" height="13" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1" fill="var(--accent-2)" opacity=".28"/></pattern></defs>
+            <rect width="620" height="390" fill="url(#dots)" opacity=".35"/>
+            <path d="M65 91l28-28 48-8 24 15 37-3 23 19-9 28-29 12-10 30-25 8-14 35-24 5-12-25-27-10-10-29-28-9-8-25z"/>
+            <path d="M175 222l32 8 22 30-5 35-20 44-18-17-8-40-19-26z"/>
+            <path d="M280 79l28-23 35 7 16 20-14 20-33-3z"/>
+            <path d="M315 126l34-24 52 4 28 21-10 31-29 12-9 37-24 20-23-15-13-39-26-16z"/>
+            <path d="M383 74l55-24 70 13 34 31-16 27-44 2-28 22-34-15-25 8-20-28z"/>
+            <path d="M440 205l31-10 38 18 8 34-28 25-33-13-20-28z"/>
+            <path d="M520 280l22-10 22 13-7 22-26 4z"/>
+            <path class="route" d="M115 139 Q235 30 345 143 T490 105 M345 143 Q400 235 470 220 T535 292"/>
+            <circle class="pin" cx="115" cy="139" r="7"/><circle class="pin" cx="345" cy="143" r="7"/><circle class="pin" cx="490" cy="105" r="7"/><circle class="pin" cx="470" cy="220" r="7"/>
+            <circle cx="345" cy="143" r="17" fill="none" stroke="var(--accent)" opacity=".35"><animate attributeName="r" values="12;24;12" dur="3s" repeatCount="indefinite"/></circle>
+          </svg>
+          <div class="map-caption">A connected view of global fuel markets</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="wrap stats" id="overview">
+      <div class="stat"><strong>2020–26</strong><span>Years covered in the study</span></div>
+      <div class="stat"><strong>84</strong><span>Countries represented</span></div>
+      <div class="stat"><strong>7</strong><span>Global regions</span></div>
+      <div class="stat"><strong>27K+</strong><span>Complete data records</span></div>
+    </div>
+
+    <section class="content-section" id="dashboard">
+      <div class="wrap">
+        <div class="section-head">
+          <div><div class="section-kicker">01 / Interactive analytics</div><h2>Global fuel dashboard</h2><p class="section-desc">Compare petrol, diesel and LPG prices, explore taxation patterns, and examine how fuel costs differ across countries and regions.</p></div>
+          <div class="live-tag"><i></i> Interactive Tableau report</div>
+        </div>
+        <div class="viz-shell">
+          <div class="viz-top"><strong>Global Fuel Prices and Taxation Trends (2020–2026)</strong><span>Use Tableau controls to explore</span></div>
+          <iframe class="tableau-frame dashboard-frame" title="Global Fuel Prices and Taxation Trends dashboard" src="https://public.tableau.com/views/GlobalfuelpricesDashboard_17935304913820/GlobalFuelPricesandTaxationTrends20202026?:showVizHome=no&amp;:embed=true&amp;:toolbar=yes&amp;:tabs=no" loading="lazy" allowfullscreen></iframe>
+        </div>
+      </div>
+    </section>
+
+    <section class="content-section" id="stories">
+      <div class="wrap">
+        <div class="section-head">
+          <div><div class="section-kicker">02 / Perspectives</div><h2>Three stories. One global picture.</h2><p class="section-desc">See the same energy landscape through the eyes of policy, supply-chain and academic research experts.</p></div>
+          <div class="live-tag">Choose a perspective below</div>
+        </div>
+        <div class="story-tabs" role="tablist" aria-label="Research stories">
+          <button class="story-tab active" role="tab" aria-selected="true" data-story="story1">01 · Energy policy</button>
+          <button class="story-tab" role="tab" aria-selected="false" data-story="story2">02 · Global supply chain</button>
+          <button class="story-tab" role="tab" aria-selected="false" data-story="story3">03 · Energy economics</button>
+        </div>
+
+        <div class="story-panel active" id="story1" role="tabpanel">
+          <div class="viz-shell">
+            <div class="story-intro"><div><h3>Dr. Sarah Mitchell</h3><p>Energy Policy Consultant · Taxation, affordability and public policy</p></div><div class="story-number">01</div></div>
+            <iframe class="tableau-frame story-frame" title="Story 1: Dr Sarah Mitchell, Energy Policy Consultant" src="https://public.tableau.com/views/Globalfuelpricesstory1/Story1Dr_SarahMitchellEnergyPolicyConsultant?:showVizHome=no&amp;:embed=true&amp;:toolbar=yes&amp;:tabs=no" loading="lazy" allowfullscreen></iframe>
+          </div>
+        </div>
+        <div class="story-panel" id="story2" role="tabpanel">
+          <div class="viz-shell">
+            <div class="story-intro"><div><h3>Marcus Thompson</h3><p>Global Supply Chain Manager · Fuel costs and operational impact</p></div><div class="story-number">02</div></div>
+            <iframe class="tableau-frame story-frame" title="Story 2: Marcus Thompson, Global Supply Chain Manager" src="https://public.tableau.com/views/GlobalfuelpricesStory2_17935307349490/Story2MarcusThompsonGlobalSupplyChainManager?:showVizHome=no&amp;:embed=true&amp;:toolbar=yes&amp;:tabs=no" loading="lazy" allowfullscreen></iframe>
+          </div>
+        </div>
+        <div class="story-panel" id="story3" role="tabpanel">
+          <div class="viz-shell">
+            <div class="story-intro"><div><h3>Professor Elena Rodriguez</h3><p>Energy Economics Researcher · Long-term trends and market dynamics</p></div><div class="story-number">03</div></div>
+            <iframe class="tableau-frame story-frame" title="Story 3: Professor Elena Rodriguez, Energy Economics Researcher" src="https://public.tableau.com/views/Globalfuelpricesstory3/Story3ProfessorElenaRodriguezEnergyEconomicsResearcher?:showVizHome=no&amp;:embed=true&amp;:toolbar=yes&amp;:tabs=no" loading="lazy" allowfullscreen></iframe>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="content-section" id="about">
+      <div class="wrap about-grid">
+        <div><div class="section-kicker">03 / About the project</div><h2>Making energy data easier to understand.</h2><p class="section-desc">FuelScope brings together global fuel-price and taxation indicators to help people explore the forces behind energy costs. The interactive dashboard is supported by three story-led views designed for different decision-making perspectives.</p></div>
+        <div class="about-card">
+          <h3 style="margin:0;font:600 19px 'Space Grotesk'">Inside the dataset</h3>
+          <p>The project examines country-level fuel prices and related economic indicators across 2020–2026.</p>
+          <ul class="data-points"><li>Petrol, diesel and LPG price comparisons</li><li>Fuel taxation and subsidy indicators</li><li>Country, region and income-level comparisons</li><li>Trends designed for policy and business analysis</li></ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap footer-inner"><span>© 2026 FuelScope · Global Fuel Prices and Taxation Trends</span><span>Built with Tableau Public <a class="to-top" href="#home"> · Back to top ↑</a></span></div>
+  </footer>
+
+  <script>
+    const themeToggle = document.getElementById('themeToggle');
+    themeToggle.addEventListener('click', () => {
+      document.body.classList.toggle('light');
+      const isLight = document.body.classList.contains('light');
+      themeToggle.textContent = isLight ? '☾' : '☼';
+      document.querySelector('meta[name="theme-color"]').content = isLight ? '#f4f7fb' : '#07111f';
+    });
+
+    document.getElementById('menuToggle').addEventListener('click', () => {
+      document.getElementById('navLinks').classList.toggle('open');
+    });
+    document.querySelectorAll('#navLinks a').forEach(link => link.addEventListener('click', () => {
+      document.getElementById('navLinks').classList.remove('open');
+    }));
+
+    const tabs = document.querySelectorAll('.story-tab');
+    tabs.forEach(tab => tab.addEventListener('click', () => {
+      tabs.forEach(item => {
+        item.classList.remove('active');
+        item.setAttribute('aria-selected', 'false');
+      });
+      document.querySelectorAll('.story-panel').forEach(panel => panel.classList.remove('active'));
+      tab.classList.add('active');
+      tab.setAttribute('aria-selected', 'true');
+      document.getElementById(tab.dataset.story).classList.add('active');
+    }));
+
+    if (window.gsap) {
+      gsap.registerPlugin(ScrollTrigger);
+      gsap.from('.hero-text > *', { y: 25, opacity: 0, duration: .8, stagger: .12, ease: 'power3.out' });
+      gsap.from('.map-art', { x: 35, opacity: 0, duration: 1.1, delay: .25, ease: 'power3.out' });
+      gsap.from('.stat', { y: 25, opacity: 0, duration: .65, stagger: .12, ease: 'power2.out', scrollTrigger: { trigger: '.stats', start: 'top 85%' } });
+      gsap.utils.toArray('.section-head, .about-card, .insight').forEach(el => {
+        gsap.from(el, { y: 24, opacity: 0, duration: .7, ease: 'power2.out', scrollTrigger: { trigger: el, start: 'top 88%' } });
+      });
+    }
+  </script>
+</body>
+</html>
